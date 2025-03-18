@@ -3,7 +3,7 @@ using WeatherApp;
 
 class Program
 {
-    private static readonly string apiKey = "6be4b1dabdf907c54ef9e6378e0e0984";
+    private static readonly string apiKey = "your_api_key";
     private static readonly HttpClient client = new();
 
     static async Task Main()
