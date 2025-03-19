@@ -23,6 +23,10 @@
             }
         }
 
+        /// <summary>
+        /// Calculate factorial
+        /// </summary>
+        /// <param name="number"></param>
         static void CalculateFactorial(int number)
         {
             long result = 1;

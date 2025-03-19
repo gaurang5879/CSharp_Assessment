@@ -10,7 +10,8 @@ namespace CustomerApp.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseSqlite("Data Source=customers.db");
+            string dbPath = Path.Combine(Directory.GetCurrentDirectory(), "customers.db");
+            options.UseSqlite($"Data Source={dbPath}");
         }
     }
 }
