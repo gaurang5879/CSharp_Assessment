@@ -1,5 +1,4 @@
-﻿using System;
-using CustomerApp.Models;
+﻿using CustomerApp.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CustomerApp.Data
