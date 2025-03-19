@@ -1,8 +1,15 @@
-﻿namespace WeatherApp
+﻿using System.Text.Json.Serialization;
+
+namespace WeatherApp
 {
     public class WeatherCurrent
     {
-        public float Temperature { get; set; }
-        public string[] WeatherDescriptions { get; set; }
+        public int Temperature { get; set; }
+        [JsonPropertyName("weather_code")]
+        public int WeatherCode { get; set; }
+        [JsonPropertyName("weather_icons")]
+        public string[]? WeatherIcons { get; set; }
+        [JsonPropertyName("weather_descriptions")]
+        public string[]? WeatherDescriptions { get; set; }
     }
 }
