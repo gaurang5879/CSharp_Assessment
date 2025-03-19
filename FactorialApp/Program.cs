@@ -12,7 +12,20 @@
 
             foreach (var num in numbers)
             {
-                Thread thread = new(() => CalculateFactorial(num));
+                Thread thread = new(() => {
+                    try
+                    {
+                        long result = CalculateFactorial(num);
+                        lock (_lock) // Ensures only one thread writes to console at a time
+                        {
+                            Console.WriteLine($"Factorial of {num} is {result}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error calculating factorial of {num}: {ex.Message}");
+                    }
+                });
                 threads.Add(thread);
                 thread.Start();
             }
@@ -24,21 +37,26 @@
         }
 
         /// <summary>
-        /// Calculate factorial
+        /// Calculate factorial recursive
         /// </summary>
-        /// <param name="number"></param>
-        static void CalculateFactorial(int number)
+        /// <param name="number">The number for which the factorial is to be calculated.</param>
+        /// <returns>The factorial of the given number</returns>
+        /// <exception cref="ArgumentException">Thrown if the number is negative.</exception>
+        public static long CalculateFactorial(int number)
         {
-            long result = 1;
-            for (int i = 1; i <= number; i++)
+            if (number < 0)
             {
-                result *= i;
+                throw new ArgumentException("Number must be non-negative.");
             }
 
-            lock (_lock)
+            // Base case: factorial of 0 or 1 is 1
+            if (number == 0 || number == 1)
             {
-                Console.WriteLine($"Factorial of {number} is {result}");
+                return 1;
             }
+
+            // Recursive call
+            return number * CalculateFactorial(number - 1);
         }
     }
 }
