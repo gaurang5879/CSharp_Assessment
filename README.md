@@ -4,6 +4,15 @@ This repository contains three C# projects **multi-threading**, **database opera
 
 ---
 
+## **System Requirements**
+Before running the projects, ensure your system has the following:
+
+- **.NET 8 SDK** (Download from [Microsoft](https://dotnet.microsoft.com/en-us/download))
+- **SQLite** (if using SQLite as the database)
+  - Windows: [Download Precompiled Binaries](https://www.sqlite.org/download.html) and add to `PATH`
+
+---
+
 ## **Project 1: Multi-threaded Factorial Calculation**
 
 ### **Description**
