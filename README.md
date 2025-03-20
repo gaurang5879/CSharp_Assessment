@@ -1,6 +1,6 @@
 # C# Assessment Projects
 
-This repository contains three C# projects **multi-threading**, **database operations using Entity Framework**, and **consuming REST APIs**.
+This repository contains five C# projects **CustomerApp.API**, **CustomerApp.Data**, **FactorialApp**, **WeatherApp**, and **TestProject**.
 
 ---
 
@@ -13,10 +13,60 @@ Before running the projects, ensure your system has the following:
 
 ---
 
-## **Project 1: Multi-threaded Factorial Calculation**
+## **Project 1: CustomerApp.API**
 
 ### **Description**
-This is a C# console application that calculates the factorial of different numbers concurrently using multiple threads. It ensures **thread safety** using synchronization techniques.
+A RESTful API built with ASP.NET Core that provides CRUD operations for `Customer` entities using **Entity Framework Core** and **SQLite**.
+
+### **How to Run**
+1. Open a terminal or command prompt.
+2. Navigate to the project directory:
+   ```sh
+   cd CustomerApp.API
+   ```
+3. Restore dependencies:
+   ```sh
+   dotnet restore
+   ```
+4. Run the application:
+   ```sh
+   dotnet run
+   ```
+5. The API will start at `http://localhost:5000` or `https://localhost:5001`.
+
+### **How to Change API Key**
+- Open `appsettings.json`.
+- Locate the `ApiSettings` section and update the `ApiKey` value.
+
+---
+
+## **Project 2: CustomerApp.Data**
+
+### **Description**
+A data access layer for `CustomerApp.API`, handling database interactions with **Entity Framework Core** and **SQLite**.
+
+### **How to Run**
+1. Open a terminal or command prompt.
+2. Navigate to the project directory:
+   ```sh
+   cd CustomerApp.Data
+   ```
+3. Restore dependencies:
+   ```sh
+   dotnet restore
+   ```
+4. Apply database migrations:
+   ```sh
+   dotnet ef database update
+   ```
+5. This will create the required tables in `customers.db`.
+
+---
+
+## **Project 3: FactorialApp**
+
+### **Description**
+A C# console application that calculates the factorial of different numbers concurrently using **Task Parallel Library (TPL)** for better efficiency. It ensures **thread safety** using synchronization techniques and provides real-time execution tracking.
 
 ### **How to Run**
 1. Open a terminal or command prompt.
@@ -28,41 +78,15 @@ This is a C# console application that calculates the factorial of different numb
    ```sh
    dotnet run
    ```
+4. Enter numbers when prompted, or type `exit` to quit.
 
 ### **Assumptions**
-- The numbers for which factorial is calculated are **hardcoded** inside the application.
-- The application will **execute all threads concurrently** and print results in any order.
+- The application will **execute calculations asynchronously**.
+- Users can **cancel calculations mid-way** if needed.
 
 ---
 
-## **Project 2: Customer Management using Entity Framework**
-
-### **Description**
-A C# console application that implements **CRUD operations** (Create, Read, Update, Delete) for a `Customer` entity using **Entity Framework** and **SQLite**.
-
-### **How to Run**
-1. Open a terminal or command prompt.
-2. Navigate to the project directory:
-   ```sh
-   cd CustomerApp
-   ```
-3. Run the application:
-   ```sh
-   dotnet run
-   ```
-4. This will:
-   - Create a local SQLite database (`customers.db`).
-   - Add a sample customer.
-   - Fetch and display customers.
-   - Update and delete a customer as part of the example flow.
-
-### **Assumptions**
-- **SQLite** is used by default (`Data Source=customers.db`).
-- The database is **automatically created** on first run.
-
----
-
-## **Project 3: Weather API Consumer**
+## **Project 4: WeatherApp**
 
 ### **Description**
 A C# console application that fetches the **current weather** of a given city using the **Weatherstack API**.
@@ -73,21 +97,25 @@ A C# console application that fetches the **current weather** of a given city us
    ```sh
    cd WeatherApp
    ```
-3. Open `Program.cs` and replace `your_api_key` with a valid API key from [Weatherstack](https://weatherstack.com/dashboard).
+3. Open `appsettings.json` and replace `your_api_key` with a valid API key from [Weatherstack](https://weatherstack.com/dashboard).
 4. Run the application:
    ```sh
    dotnet run
    ```
 5. Enter the city name and country name when prompted, and the application will fetch and display the weather information.
 
+### **How to Change API Key**
+- Open `appsettings.json`.
+- Locate the `WeatherApiSettings` section and update the `ApiKey` value.
+
 ### **Assumptions**
-- The API key must be obtained **manually** from Weatherstack and **inserted in the code**.
+- The API key must be obtained **manually** from Weatherstack and **inserted in the configuration file**.
 - The application fetches weather data **only for cities supported by Weatherstack**.
 
 ---
 
 ## **Running Unit Tests**
-This repository contains **NUnit tests** for the Customer Management and Weather application.
+This repository contains **NUnit tests** for the CustomerApp and FactorialApp.
 
 ### **How to Run Tests**
 1. Open a terminal or command prompt.
@@ -105,11 +133,11 @@ This repository contains **NUnit tests** for the Customer Management and Weather
 ## **Project Structure**
 ```
 CSharp_Assessment/
-│-- CustomerApp/          # CRUD application using Entity Framework
+│-- CustomerApp.API/      # RESTful API for customer management
+│-- CustomerApp.Data/     # Data access layer for CustomerApp.API
 │-- FactorialApp/         # Multi-threaded factorial calculator
 │-- TestProject/          # NUnit test cases for Customer application
 │-- WeatherApp/           # REST API consumer for weather data
-│-- WeatherTestProject/   # NUnit test cases for Weather application
 │-- README.md             # Documentation
 │-- .gitignore            # Git ignore file
 ```
