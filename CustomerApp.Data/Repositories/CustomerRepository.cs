@@ -1,23 +1,21 @@
-﻿using CustomerApp.Data;
-using CustomerApp.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using CustomerApp.Data.Data;
+using CustomerApp.Data.Models;
 
-namespace CustomerApp.Repository
+namespace CustomerApp.Data.Repositories
 {
     /// <summary>
     /// Customer entity repository.
     /// </summary>
-    public class CustomerRepository
+    public class CustomerRepository : ICustomerRepository
     {
         private readonly CustomerContext _context;
 
         /// <summary>
         /// Contructor of customer repository
         /// </summary>
-        public CustomerRepository()
+        public CustomerRepository(CustomerContext context)
         {
-            _context = new CustomerContext();
-            _context.Database.EnsureCreated();
+            _context = context;
         }
 
         /// <summary>
@@ -28,17 +26,13 @@ namespace CustomerApp.Repository
         {
             _context.Customers.Add(customer);
             _context.SaveChanges();
-            Console.WriteLine("Customer added.");
         }
 
         /// <summary>
         /// Retrieves all customers from the database.
         /// </summary>
         /// <returns></returns>
-        public List<Customer> GetCustomers()
-        {
-            return _context.Customers.ToList();
-        }
+        public List<Customer> GetCustomers() => _context.Customers.ToList();
 
         /// <summary>
         /// Updates customer details if the customer exists.
@@ -74,21 +68,5 @@ namespace CustomerApp.Repository
             _context.SaveChanges();
             return true;
         }
-
-        /// <summary>
-        /// Delete all customers
-        /// </summary>
-        public void DeleteAllCustomers()
-        {
-            var allCustomers = _context.Customers.ToList();
-            _context.Customers.RemoveRange(allCustomers);
-            _context.SaveChanges();
-
-            //Reset auto-increment counter
-            _context.Database.ExecuteSqlRaw("DELETE FROM sqlite_sequence WHERE name='Customers'");
-
-            Console.WriteLine("All customers deleted.");
-        }
-
     }
 }

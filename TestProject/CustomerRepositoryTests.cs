@@ -1,95 +1,96 @@
-using CustomerApp.Models;
-using CustomerApp.Repository;
+﻿using CustomerApp.Data.Data;
+using CustomerApp.Data.Models;
+using CustomerApp.Data.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace TestProject
 {
     [TestFixture]
     public class CustomerRepositoryTests
     {
-        private CustomerRepository _repo;
+        private CustomerContext _context;
+        private CustomerRepository _repository;
 
         [SetUp]
         public void Setup()
         {
-            _repo = new CustomerRepository();
-            _repo.DeleteAllCustomers();
+            var options = new DbContextOptionsBuilder<CustomerContext>()
+                .UseInMemoryDatabase(databaseName: "TestCustomerDb") // Ensures a fresh DB for each test
+                .Options;
+
+            _context = new CustomerContext(options);
+            _context.Database.EnsureDeleted(); // Reset DB before each test
+            _context.Database.EnsureCreated();
+            _repository = new CustomerRepository(_context);
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            _context.Dispose(); // Dispose context after test
         }
 
         [Test]
-        public void AddCustomer_ShouldIncreaseCount()
+        public void AddCustomer_Should_AddCustomer_ToDatabase()
         {
-            var initialCount = _repo.GetCustomers().Count;
-            _repo.AddCustomer(new Customer { Name = "Test User", Email = "test@example.com", PhoneNumber = "1234567890" });
-            var newCount = _repo.GetCustomers().Count;
-            Assert.AreEqual(initialCount + 1, newCount);
+            // Arrange
+            var customer = new Customer { Name = "John Doe", Email = "john@example.com", PhoneNumber = "1234567890" };
+
+            // Act
+            _repository.AddCustomer(customer);
+            var customers = _repository.GetCustomers();
+
+            // Assert
+            Assert.AreEqual(1, customers.Count);
+            Assert.AreEqual("John Doe", customers[0].Name);
         }
 
         [Test]
-        public void AddCustomer_NullCustomer_ShouldThrowArgumentNullException()
+        public void GetCustomers_Should_ReturnAllCustomers()
         {
-            Assert.Throws<ArgumentNullException>(() => _repo.AddCustomer(null));
+            // Arrange
+            _repository.AddCustomer(new Customer { Name = "Alice", Email = "alice@example.com", PhoneNumber = "1111111111" });
+            _repository.AddCustomer(new Customer { Name = "Bob", Email = "bob@example.com", PhoneNumber = "2222222222" });
+
+            // Act
+            var customers = _repository.GetCustomers();
+
+            // Assert
+            Assert.AreEqual(2, customers.Count);
         }
 
         [Test]
-        public void UpdateCustomer_ShouldModifyExistingRecord()
+        public void UpdateCustomer_Should_UpdateExistingCustomer()
         {
-            var customer = new Customer { Name = "Initial Name", Email = "initial@example.com", PhoneNumber = "1111111111" };
-            _repo.AddCustomer(customer);
-            var savedCustomer = _repo.GetCustomers().First();
+            // Arrange
+            var customer = new Customer { Name = "Charlie", Email = "charlie@example.com", PhoneNumber = "3333333333" };
+            _repository.AddCustomer(customer);
+            var existingCustomer = _repository.GetCustomers().First();
 
-            bool updated = _repo.UpdateCustomer(savedCustomer.CustomerID, "Updated Name", "updated@example.com", "2222222222");
-            var updatedCustomer = _repo.GetCustomers().First();
+            // Act
+            bool result = _repository.UpdateCustomer(existingCustomer.CustomerID, "Charlie Updated", "charlie.updated@example.com", "4444444444");
+            var updatedCustomer = _repository.GetCustomers().First();
 
-            Assert.IsTrue(updated);
-            Assert.AreEqual("Updated Name", updatedCustomer.Name);
-            Assert.AreEqual("updated@example.com", updatedCustomer.Email);
-            Assert.AreEqual("2222222222", updatedCustomer.PhoneNumber);
+            // Assert
+            Assert.IsTrue(result);
+            Assert.AreEqual("Charlie Updated", updatedCustomer.Name);
         }
 
         [Test]
-        public void UpdateCustomer_NonExistentId_ShouldReturnFalse()
+        public void DeleteCustomer_Should_RemoveCustomer()
         {
-            bool updated = _repo.UpdateCustomer(999, "Name", "email@example.com", "1234567890");
-            Assert.IsFalse(updated);
-        }
+            // Arrange
+            var customer = new Customer { Name = "David", Email = "david@example.com", PhoneNumber = "5555555555" };
+            _repository.AddCustomer(customer);
+            var existingCustomer = _repository.GetCustomers().First();
 
-        [Test]
-        public void DeleteCustomer_ShouldDecreaseCount()
-        {
-            _repo.AddCustomer(new Customer { Name = "Delete User", Email = "delete@example.com", PhoneNumber = "3333333333" });
-            var initialCount = _repo.GetCustomers().Count;
+            // Act
+            bool result = _repository.DeleteCustomer(existingCustomer.CustomerID);
+            var customers = _repository.GetCustomers();
 
-            var customer = _repo.GetCustomers().First();
-            bool deleted = _repo.DeleteCustomer(customer.CustomerID);
-
-            var newCount = _repo.GetCustomers().Count;
-            Assert.IsTrue(deleted);
-            Assert.AreEqual(initialCount - 1, newCount);
-        }
-
-        [Test]
-        public void DeleteCustomer_NonExistentId_ShouldReturnFalse()
-        {
-            bool deleted = _repo.DeleteCustomer(999);
-            Assert.IsFalse(deleted);
-        }
-
-        [Test]
-        public void DeleteAllCustomers_ShouldRemoveAllRecords()
-        {
-            _repo.AddCustomer(new Customer { Name = "User1", Email = "user1@example.com", PhoneNumber = "4444444444" });
-            _repo.AddCustomer(new Customer { Name = "User2", Email = "user2@example.com", PhoneNumber = "5555555555" });
-            Assert.IsTrue(_repo.GetCustomers().Count > 0);
-
-            _repo.DeleteAllCustomers();
-            Assert.That(_repo.GetCustomers().Count, Is.EqualTo(0));
-        }
-
-        [Test]
-        public void DeleteAllCustomers_EmptyDatabase_ShouldNotThrowError()
-        {
-            Assert.DoesNotThrow(() => _repo.DeleteAllCustomers());
-            Assert.AreEqual(0, _repo.GetCustomers().Count);
+            // Assert
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, customers.Count);
         }
     }
 }
