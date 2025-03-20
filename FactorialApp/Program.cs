@@ -1,62 +1,103 @@
 ﻿namespace FactorialApp
 {
-    internal class Program
+    public class Program
     {
-        static readonly object _lock = new();
+        private static readonly object _lock = new();
+        private const int MaxFactorialInput = 20;
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            int[] numbers = [1, 2, 3, 4, 5];
+            Console.WriteLine(string.Format(Messages.WarningMaxFactorial, MaxFactorialInput));
+            Console.Write(Messages.EnterNumbers);
 
-            List<Thread> threads = [];
+            string input = Console.ReadLine();
+            int[] numbers = ParseNumbers(input);
+
+            if (numbers.Length == 0)
+            {
+                Console.WriteLine(string.Format(Messages.NoValidNumbers, MaxFactorialInput));
+                return;
+            }
+
+            Console.Write(Messages.EnterThreadCount);
+            if (!int.TryParse(Console.ReadLine(), out int threadCount) || threadCount < 1)
+            {
+                Console.WriteLine(string.Format(Messages.InvalidThreadCount, 2));
+                threadCount = 2;
+            }
+
+            List<Task> tasks = new List<Task>();
 
             foreach (var num in numbers)
             {
-                Thread thread = new(() => {
-                    try
-                    {
-                        long result = CalculateFactorial(num);
-                        lock (_lock) // Ensures only one thread writes to console at a time
-                        {
-                            Console.WriteLine($"Factorial of {num} is {result}");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error calculating factorial of {num}: {ex.Message}");
-                    }
-                });
-                threads.Add(thread);
-                thread.Start();
+                tasks.Add(Task.Run(() => CalculateFactorialWithTimeout(num)));
             }
 
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
+            await Task.WhenAll(tasks);
+            Console.WriteLine(Messages.AllCalculationsComplete);
         }
 
         /// <summary>
-        /// Calculate factorial recursive
+        /// Parse inputs
         /// </summary>
-        /// <param name="number">The number for which the factorial is to be calculated.</param>
-        /// <returns>The factorial of the given number</returns>
-        /// <exception cref="ArgumentException">Thrown if the number is negative.</exception>
-        public static long CalculateFactorial(int number)
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private static int[] ParseNumbers(string input)
         {
-            if (number < 0)
+            return input
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(num => int.TryParse(num, out int value) ? value : (int?)null)
+                .Where(value => value.HasValue)
+                .Select(value => value.Value)
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Callculate factorial with timeout of 5 seconds
+        /// </summary>
+        /// <param name="num"></param>
+        private static void CalculateFactorialWithTimeout(int num)
+        {
+            if (num < 0)
             {
-                throw new ArgumentException("Number must be non-negative.");
+                Console.WriteLine(string.Format(Messages.InvalidNegativeInput, num));
+                return;
             }
 
-            // Base case: factorial of 0 or 1 is 1
-            if (number == 0 || number == 1)
+            if (num > MaxFactorialInput)
             {
-                return 1;
+                Console.WriteLine(string.Format(Messages.InvalidMaxInput, num, MaxFactorialInput));
+                return;
             }
 
-            // Recursive call
-            return number * CalculateFactorial(number - 1);
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var task = Task.Run(() => FactorialCalculator.CalculateFactorial(num), cts.Token);
+
+                if (task.Wait(5000, cts.Token))
+                {
+                    lock (_lock)
+                    {
+                        Console.WriteLine(string.Format(Messages.FactorialResult, num, task.Result));
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(string.Format(Messages.CalculationTimeout, num));
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine(string.Format(Messages.CalculationCancelled, num));
+            }
+            catch (Exception ex)
+            {
+                lock (_lock)
+                {
+                    Console.WriteLine(string.Format(Messages.CalculationError, num, ex.Message));
+                }
+            }
         }
     }
 }
