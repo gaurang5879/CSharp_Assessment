@@ -9,13 +9,24 @@ public class WeatherFetcher
     private static string _baseUrl;
 
     /// <summary>
-    /// Constructor
+    /// Constructor with optional API Key & Base URL for testing
     /// </summary>
     /// <param name="httpClient"></param>
-    public WeatherFetcher(HttpClient httpClient)
+    /// <param name="apiKey"></param>
+    /// <param name="baseUrl"></param>
+    public WeatherFetcher(HttpClient httpClient, string? apiKey = null, string? baseUrl = null)
     {
         _httpClient = httpClient;
-        LoadConfiguration();
+
+        if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(baseUrl))
+        {
+            _apiKey = apiKey;
+            _baseUrl = baseUrl;
+        }
+        else
+        {
+            LoadConfiguration();
+        }
     }
 
     /// <summary>
@@ -31,7 +42,8 @@ public class WeatherFetcher
             _apiKey = jsonNode?["WeatherAPI"]?["ApiKey"]?.ToString();
             _baseUrl = jsonNode?["WeatherAPI"]?["BaseUrl"]?.ToString();
         }
-        if (string.IsNullOrWhiteSpace(_apiKey))
+
+        if (string.IsNullOrWhiteSpace(_apiKey) && !IsTestEnvironment())
         {
             Console.Write(Messages.EnterApiKey);
             _apiKey = Console.ReadLine()?.Trim();
@@ -40,6 +52,15 @@ public class WeatherFetcher
                 File.WriteAllText(configPath, $"{{\"WeatherAPI\":{{\"ApiKey\":\"{_apiKey}\", \"BaseUrl\": \"{_baseUrl ?? "http://api.weatherstack.com/current"}\"}}}}");
             }
         }
+    }
+
+    /// <summary>
+    /// Determines if the application is running inside a test environment
+    /// </summary>
+    /// <returns>True if running in test environment</returns>
+    private static bool IsTestEnvironment()
+    {
+        return AppDomain.CurrentDomain.GetAssemblies().Any(a => a.FullName.StartsWith("test", StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
