@@ -78,7 +78,7 @@ A C# console application that fetches the **current weather** of a given city us
    ```sh
    dotnet run
    ```
-5. Enter the city name when prompted, and the application will fetch and display the weather information.
+5. Enter the city name and country name when prompted, and the application will fetch and display the weather information.
 
 ### **Assumptions**
 - The API key must be obtained **manually** from Weatherstack and **inserted in the code**.
@@ -87,7 +87,7 @@ A C# console application that fetches the **current weather** of a given city us
 ---
 
 ## **Running Unit Tests**
-This repository contains **NUnit tests** for the Customer Management application.
+This repository contains **NUnit tests** for the Customer Management and Weather application.
 
 ### **How to Run Tests**
 1. Open a terminal or command prompt.
@@ -100,19 +100,16 @@ This repository contains **NUnit tests** for the Customer Management application
    dotnet test
    ```
 
-### **Implemented Test Cases**
-- **`AddCustomer_ShouldIncreaseCount()`** → Tests if adding a customer increases the count.
-- **`DeleteCustomer_ShouldDecreaseCount()`** → Tests if deleting a customer decreases the count.
-
 ---
 
 ## **Project Structure**
 ```
 CSharp_Assessment/
-│-- FactorialApp/     # Multi-threaded factorial calculator
 │-- CustomerApp/          # CRUD application using Entity Framework
+│-- FactorialApp/         # Multi-threaded factorial calculator
+│-- TestProject/          # NUnit test cases for Customer application
 │-- WeatherApp/           # REST API consumer for weather data
-│-- TestProject/                # NUnit test cases
+│-- WeatherTestProject/   # NUnit test cases for Weather application
 │-- README.md             # Documentation
 │-- .gitignore            # Git ignore file
 ```
